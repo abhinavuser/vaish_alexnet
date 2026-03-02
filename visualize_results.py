@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 """
 Visualization module for training results
 """
@@ -9,21 +9,21 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import roc_curve, auc
 
-# Set style
+
 sns.set_style("whitegrid")
 plt.rcParams['figure.figsize'] = (15, 10)
 
 def visualize_all(results, test_data):
-    """Create comprehensive visualizations"""
-    
+
+
     fig = plt.figure(figsize=(18, 12))
-    
-    # 1. Cross-Validation Fold Results
+
+
     ax1 = plt.subplot(2, 3, 1)
     folds = list(range(1, len(results['cross_validation']['fold_accuracies']) + 1))
     fold_accs = results['cross_validation']['fold_accuracies']
     fold_val_accs = results['cross_validation']['fold_val_accuracies']
-    
+
     ax1.bar([i - 0.2 for i in folds], fold_accs, width=0.4, label='Train Acc', alpha=0.8)
     ax1.bar([i + 0.2 for i in folds], fold_val_accs, width=0.4, label='Val Acc', alpha=0.8)
     ax1.axhline(y=0.90, color='r', linestyle='--', linewidth=2, label='90% Target')
@@ -34,8 +34,8 @@ def visualize_all(results, test_data):
     ax1.legend()
     ax1.set_ylim([0.7, 1.0])
     ax1.grid(True, alpha=0.3)
-    
-    # 2. Cross-Validation Metrics Summary
+
+
     ax2 = plt.subplot(2, 3, 2)
     metrics = ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC']
     means = [
@@ -51,26 +51,26 @@ def visualize_all(results, test_data):
     ax2.set_title('Cross-Validation Metrics (Mean)')
     ax2.set_xlim([0, 1])
     ax2.axvline(x=0.90, color='r', linestyle='--', linewidth=2, alpha=0.5)
-    
-    # Add value labels on bars
+
+
     for i, (bar, val) in enumerate(zip(bars, means)):
         ax2.text(val + 0.02, i, f'{val:.4f}', va='center')
-    
-    # 3. Test Set Confusion Matrix
+
+
     ax3 = plt.subplot(2, 3, 3)
     cm = np.array(results['test_results']['confusion_matrix'])
-    
-    # Normalize for heatmap
+
+
     cm_norm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-    
+
     sns.heatmap(cm_norm, annot=True, fmt='.2%', cmap='Blues', cbar=False, ax=ax3,
                 xticklabels=['Healthy', 'Diseased'],
                 yticklabels=['Healthy', 'Diseased'])
     ax3.set_title('Test Set Confusion Matrix (Normalized)')
     ax3.set_ylabel('True Label')
     ax3.set_xlabel('Predicted Label')
-    
-    # 4. Test Metrics
+
+
     ax4 = plt.subplot(2, 3, 4)
     test_metrics = ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC']
     test_values = [
@@ -86,18 +86,18 @@ def visualize_all(results, test_data):
     ax4.set_title(f"Test Set Metrics (Accuracy: {results['test_results']['test_accuracy']:.2%})")
     ax4.set_xlim([0, 1])
     ax4.axvline(x=0.90, color='r', linestyle='--', linewidth=2, alpha=0.5)
-    
-    # Add value labels
+
+
     for bar, val in zip(bars, test_values):
-        ax4.text(val + 0.02, bar.get_y() + bar.get_height()/2, f'{val:.4f}', 
+        ax4.text(val + 0.02, bar.get_y() + bar.get_height()/2, f'{val:.4f}',
                 va='center', fontweight='bold')
-    
-    # 5. ROC-AUC Curve
+
+
     ax5 = plt.subplot(2, 3, 5)
     test_labels, test_preds, test_probs = test_data
     fpr, tpr, thresholds = roc_curve(test_labels, test_probs)
     roc_auc = auc(fpr, tpr)
-    
+
     ax5.plot(fpr, tpr, color='darkorange', lw=2.5, label=f'ROC Curve (AUC = {roc_auc:.4f})')
     ax5.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--', label='Random Classifier')
     ax5.set_xlim([0.0, 1.0])
@@ -107,33 +107,33 @@ def visualize_all(results, test_data):
     ax5.set_title('ROC-AUC Curve (Test Set)')
     ax5.legend(loc="lower right")
     ax5.grid(True, alpha=0.3)
-    
-    # 6. Data Distribution
+
+
     ax6 = plt.subplot(2, 3, 6)
     test_healthy = results['test_results']['num_healthy_test']
     test_diseased = results['test_results']['num_diseased_test']
-    
+
     sizes = [test_healthy, test_diseased]
     labels = [f'Healthy\n({test_healthy})', f'Diseased\n({test_diseased})']
     colors_pie = ['#2ecc71', '#e74c3c']
     explode = (0.1, 0.1)
-    
+
     ax6.pie(sizes, explode=explode, labels=labels, colors=colors_pie, autopct='%1.1f%%',
             shadow=True, startangle=90, textprops={'fontsize': 10})
     ax6.set_title('Test Set Class Distribution')
-    
+
     plt.tight_layout()
     plt.savefig('training_results_visualization.png', dpi=300, bbox_inches='tight')
     print("✓ Saved: training_results_visualization.png")
     plt.close()
-    
-    # ============ DETAILED FOLD METRICS ============
+
+
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    
+
     folds = list(range(1, len(results['cross_validation']['fold_precisions']) + 1))
-    
-    # Precision
-    axes[0, 0].plot(folds, results['cross_validation']['fold_precisions'], 
+
+
+    axes[0, 0].plot(folds, results['cross_validation']['fold_precisions'],
                     'o-', linewidth=2, markersize=8, color='#3498db')
     axes[0, 0].axhline(y=0.90, color='r', linestyle='--', alpha=0.5)
     axes[0, 0].set_title('Precision by Fold')
@@ -141,9 +141,9 @@ def visualize_all(results, test_data):
     axes[0, 0].set_xlabel('Fold')
     axes[0, 0].grid(True, alpha=0.3)
     axes[0, 0].set_ylim([0.7, 1.0])
-    
-    # Recall
-    axes[0, 1].plot(folds, results['cross_validation']['fold_recalls'], 
+
+
+    axes[0, 1].plot(folds, results['cross_validation']['fold_recalls'],
                     'o-', linewidth=2, markersize=8, color='#e74c3c')
     axes[0, 1].axhline(y=0.90, color='r', linestyle='--', alpha=0.5)
     axes[0, 1].set_title('Recall by Fold')
@@ -151,9 +151,9 @@ def visualize_all(results, test_data):
     axes[0, 1].set_xlabel('Fold')
     axes[0, 1].grid(True, alpha=0.3)
     axes[0, 1].set_ylim([0.7, 1.0])
-    
-    # F1-Score
-    axes[1, 0].plot(folds, results['cross_validation']['fold_f1_scores'], 
+
+
+    axes[1, 0].plot(folds, results['cross_validation']['fold_f1_scores'],
                     'o-', linewidth=2, markersize=8, color='#f39c12')
     axes[1, 0].axhline(y=0.90, color='r', linestyle='--', alpha=0.5)
     axes[1, 0].set_title('F1-Score by Fold')
@@ -161,9 +161,9 @@ def visualize_all(results, test_data):
     axes[1, 0].set_xlabel('Fold')
     axes[1, 0].grid(True, alpha=0.3)
     axes[1, 0].set_ylim([0.7, 1.0])
-    
-    # ROC-AUC
-    axes[1, 1].plot(folds, results['cross_validation']['fold_roc_aucs'], 
+
+
+    axes[1, 1].plot(folds, results['cross_validation']['fold_roc_aucs'],
                     'o-', linewidth=2, markersize=8, color='#9b59b6')
     axes[1, 1].axhline(y=0.90, color='r', linestyle='--', alpha=0.5)
     axes[1, 1].set_title('ROC-AUC by Fold')
@@ -171,59 +171,59 @@ def visualize_all(results, test_data):
     axes[1, 1].set_xlabel('Fold')
     axes[1, 1].grid(True, alpha=0.3)
     axes[1, 1].set_ylim([0.7, 1.0])
-    
+
     plt.tight_layout()
     plt.savefig('cross_validation_metrics.png', dpi=300, bbox_inches='tight')
     print("✓ Saved: cross_validation_metrics.png")
     plt.close()
-    
-    # ============ SUMMARY TABLE ============
+
+
     fig, ax = plt.subplots(figsize=(12, 8))
     ax.axis('tight')
     ax.axis('off')
-    
+
     summary_data = [
         ['Metric', 'Cross-Validation', 'Test Set', 'Status'],
-        ['Accuracy', f"{results['cross_validation']['mean_accuracy']:.4f}", 
-         f"{results['test_results']['test_accuracy']:.4f}", 
+        ['Accuracy', f"{results['cross_validation']['mean_accuracy']:.4f}",
+         f"{results['test_results']['test_accuracy']:.4f}",
          '✓ PASS' if results['test_results']['test_accuracy'] >= 0.90 else '✗ FAIL'],
-        ['Precision', f"{results['cross_validation']['mean_precision']:.4f}", 
+        ['Precision', f"{results['cross_validation']['mean_precision']:.4f}",
          f"{results['test_results']['test_precision']:.4f}", ''],
-        ['Recall', f"{results['cross_validation']['mean_recall']:.4f}", 
+        ['Recall', f"{results['cross_validation']['mean_recall']:.4f}",
          f"{results['test_results']['test_recall']:.4f}", ''],
-        ['F1-Score', f"{results['cross_validation']['mean_f1']:.4f}", 
+        ['F1-Score', f"{results['cross_validation']['mean_f1']:.4f}",
          f"{results['test_results']['test_f1']:.4f}", ''],
-        ['ROC-AUC', f"{results['cross_validation']['mean_roc_auc']:.4f}", 
+        ['ROC-AUC', f"{results['cross_validation']['mean_roc_auc']:.4f}",
          f"{results['test_results']['test_roc_auc']:.4f}", ''],
     ]
-    
+
     table = ax.table(cellText=summary_data, cellLoc='center', loc='center',
                     colWidths=[0.25, 0.25, 0.25, 0.25])
     table.auto_set_font_size(False)
     table.set_fontsize(11)
     table.scale(1, 2.5)
-    
-    # Color header row
+
+
     for i in range(4):
         table[(0, i)].set_facecolor('#34495e')
         table[(0, i)].set_text_props(weight='bold', color='white')
-    
-    # Color status column
+
+
     for i in range(1, len(summary_data)):
         if i == 1 and results['test_results']['test_accuracy'] >= 0.90:
             table[(i, 3)].set_facecolor('#2ecc71')
         elif i == 1:
             table[(i, 3)].set_facecolor('#e74c3c')
-    
-    plt.title('Performance Summary: Cross-Validation vs Test Set', 
+
+    plt.title('Performance Summary: Cross-Validation vs Test Set',
              fontsize=14, fontweight='bold', pad=20)
     plt.savefig('performance_summary_table.png', dpi=300, bbox_inches='tight')
     print("✓ Saved: performance_summary_table.png")
     plt.close()
 
 if __name__ == '__main__':
-    # Load results
+
     with open('training_results.json', 'r') as f:
         results = json.load(f)
-    
+
     print("Loaded training results")
