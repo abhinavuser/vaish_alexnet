@@ -1,0 +1,16 @@
+Tomato_Leaves/
+Tomato_Leaves.zip
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.h5
+*.joblib
+*.pkl
+*.png
+*.jpg
+*.jpeg
+*.json
+*.log
+__pycache__/
+*.pyc
